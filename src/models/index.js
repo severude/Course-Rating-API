@@ -24,8 +24,29 @@ let UserSchema = new Schema({
     }
 });
 
+let ReviewSchema = new Schema({
+    user: UserSchema._id,
+    validate: {
+        validator: function() {
+            return UserSchema._id !== CourseSchema.user;
+        },
+        message: props => `${props.value} cannot review their own course`
+    },
+    postedOn: {
+        type: Date,
+        default: Date.now
+    },
+    rating: {
+        type: Number,
+        required: [true, 'Review rating is required'],
+        min: [1, 'rating must be between 1 and 5'],
+        max: [5, 'rating must be between 1 and 5']
+    },
+    review: String
+});
+
 let CourseSchema = new Schema({
-    user: userSchema._id,
+    user: UserSchema._id,
     title: {
         type: String,
         required: [true, 'Course title is required']
@@ -48,27 +69,6 @@ let CourseSchema = new Schema({
         }
     }],
     reviews: [ReviewSchema._id]
-});
-
-let ReviewSchema = new Schema({
-    user: UserSchema._id,
-    validate: {
-        validator: function() {
-            return UserSchema._id !== CourseSchema.user;
-        },
-        message: props => `${props.value} cannot review their own course`
-    },
-    postedOn: {
-        type: Date,
-        default: Date.now
-    },
-    rating: {
-        type: Number,
-        required: [true, 'Review rating is required'],
-        min: [1, 'rating must be between 1 and 5'],
-        max: [5, 'rating must be between 1 and 5']
-    },
-    review: String
 });
 
 var User = mongoose.model('User', UserSchema);

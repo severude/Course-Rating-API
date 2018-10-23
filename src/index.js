@@ -4,6 +4,8 @@
 const express = require('express');
 const morgan = require('morgan');
 const mongoose = require("mongoose");
+const bodyParser = require('body-parser');
+const routes = require("./routes/index");
 
 const app = express();
 
@@ -13,9 +15,13 @@ app.set('port', process.env.PORT || 5000);
 // morgan gives us http request logging
 app.use(morgan('dev'));
 
+// parse incoming requests
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+
 // TODO add additional routes here
-mongoose.connect("mongodb://localhost:27017/course-api");
-var db = mongoose.connection;
+mongoose.connect("mongodb://localhost:27017/course-api", { useNewUrlParser: true } );
+const db = mongoose.connection;
 
 db.on("error", (err) => {
 	console.error("Mongo database connection error:", err);
@@ -32,10 +38,12 @@ app.get('/', (req, res) => {
   });
 });
 
+app.use("/api", routes);
+
 // uncomment this route in order to test the global error handler
-// app.get('/error', function (req, res) {
-//   throw new Error('Test error');
-// });
+app.get('/error', function (req, res) {
+  throw new Error('Test error');
+});
 
 // send 404 if no other route matched
 app.use((req, res) => {
