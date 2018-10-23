@@ -1,6 +1,7 @@
 'use strict';
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+const bcrypt = require('bcrypt');
 
 let UserSchema = new Schema({
     fullName: {
@@ -22,6 +23,17 @@ let UserSchema = new Schema({
         type: String,
         required: [true, 'User password is required']
     }
+});
+// Hash password before saving to database
+UserSchema.pre('save', function(next) {
+    let user = this;
+    bcrypt.hash(user.password, 10, function(err, hash) {
+        if(err) {
+            return next(err);
+        }
+        user.password = hash;
+        next();
+    });
 });
 
 let ReviewSchema = new Schema({
