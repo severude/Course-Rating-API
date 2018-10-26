@@ -2,9 +2,10 @@
 
 const express = require('express');
 const router = express.Router();
+const mid = require('../middleware');
 
 // Returns the currently authenticated user
-router.get('/users', function(req, res, next) {
+router.get('/users', mid.authorized, function(req, res, next) {
 	res.json({response: "GET request for the currently authenticated user"});
 });
 

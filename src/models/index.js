@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const bcrypt = require('bcrypt');
 
-let UserSchema = new Schema({
+const UserSchema = new Schema({
     fullName: {
         type: String,
         required: [true, 'User fullname is required']
@@ -47,24 +47,21 @@ UserSchema.statics.authenticate = function( email, password, callback){
 				var err = new Error('User not found.');
 				err.status = 401;
 				return callback(err);
-      }
-      bcript.compare(password, user.password, function(error, result){
-        if(result === true) {
-          return callback(null, user);
-        } else {
-          return callback();
-        }
-      });
-	});
+            }
+            bcript.compare(password, user.password, function(error, result){
+                if(result === true) {
+                    return callback(null, user);
+                } else {
+                    return callback();
+                }
+            });
+    	});
 }
 
-let ReviewSchema = new Schema({
-    user: UserSchema._id,
-    validate: {
-        validator: function() {
-            return UserSchema._id !== CourseSchema.user;
-        },
-        message: props => `${props.value} cannot review their own course`
+const ReviewSchema = new Schema({
+    user: {
+        type: Schema.ObjectId,
+        ref: 'User'
     },
     postedOn: {
         type: Date,
@@ -79,8 +76,11 @@ let ReviewSchema = new Schema({
     review: String
 });
 
-let CourseSchema = new Schema({
-    user: UserSchema._id,
+const CourseSchema = new Schema({
+    user: {
+        type: Schema.ObjectId,
+        ref: 'User'
+    },
     title: {
         type: String,
         required: [true, 'Course title is required']
@@ -102,13 +102,16 @@ let CourseSchema = new Schema({
             required: [true, 'Step description is required']
         }
     }],
-    reviews: [ReviewSchema._id]
+    reviews: [{
+        type: Schema.ObjectId,
+        ref: 'Review'
+    }]
 });
 
-var User = mongoose.model('User', UserSchema);
-var Course = mongoose.model('Course', CourseSchema);
-var Review = mongoose.model('Review', ReviewSchema);
+const User = mongoose.model('User', UserSchema);
+const Course = mongoose.model('Course', CourseSchema);
+const Review = mongoose.model('Review', ReviewSchema);
 
-module.exports = User;
-module.exports = Course;
-module.exports = Review;
+module.exports.User = User;
+module.exports.Course = Course;
+module.exports.Review = Review;
