@@ -6,7 +6,7 @@ const mid = require('../middleware');
 
 // Returns the currently authenticated user
 router.get('/users', mid.authorized, function(req, res, next) {
-	res.json({response: "GET request for the currently authenticated user"});
+	res.send(req.body.user);
 });
 
 // Creates a user, sets the Location header to "/", and returns no content
