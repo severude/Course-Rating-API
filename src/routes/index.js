@@ -1,19 +1,21 @@
 'use strict';
-
 const express = require('express');
 const router = express.Router();
 const mid = require('../middleware');
+const User = require('../models').User;
 
 // Returns the currently authenticated user
 router.get('/users', mid.authorized, function(req, res, next) {
-	res.send(req.body.user);
+	res.json(req.body.user);
 });
 
 // Creates a user, sets the Location header to "/", and returns no content
 router.post('/users', function(req, res, next) {
-	res.json({
-		response: "POST request to create a user",
-		body: req.body
+	const user = new User(req.body);
+	user.save(function(err) {
+		if(err) return next(err);
+		res.status = 201;
+		res.redirect('/');
 	});
 });
 

@@ -5,13 +5,12 @@ function authorized(req, res, next) {
     const credentials = auth(req);
     if(credentials) {
         User.authenticate(credentials.name, credentials.pass, function(err, user) {
-            console.log('Hello?');
             if(err || !user) {
                 const error = new Error('Incorrect email or password.');
                 error.status = 401;
                 return next(error);
             } else {
-                res.body = user;
+                req.body.user = user;
                 return next();
             }
         });

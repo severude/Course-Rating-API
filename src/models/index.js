@@ -40,25 +40,24 @@ UserSchema.pre('save', function(next) {
 //Authenticate input against database documents
 UserSchema.statics.authenticate = function( email, password, callback){
     console.log('models:authenticate:', email, password);
-	User.findOne( {emailAddress: email} )
-		.exec(function(error, user){
-			if(error) {
-				return callback(error);
-			} else if (!user) {
-				var err = new Error('User not found.');
-				err.status = 401;
-				return callback(err);
+    User.findOne({emailAddress: email}).exec(function(error, user){
+        if(error) {
+            return callback(error);
+        } else if (!user) {
+            var err = new Error('User not found.');
+            err.status = 401;
+            return callback(err);
+        }
+        console.log('models:bcrypt:', password, user.password);
+        bcrypt.compare(password, user.password, function(error, result){
+            console.log('bcrypt:', result);
+            if(result === true) {
+                return callback(null, user);
+            } else {
+                return callback();
             }
-            console.log('models:bcrypt:', password, user.password);
-            bcrypt.compare(password, user.password, function(error, result){
-                console.log('bcrypt:', result);
-                if(result === true) {
-                    return callback(null, user);
-                } else {
-                    return callback();
-                }
-            });
-    	});
+        });
+    });
 }
 
 const ReviewSchema = new Schema({
