@@ -15,7 +15,7 @@ function authorized(req, res, next) {
             }
         });
     } else {
-        const error = new Error('Email and password are required.');
+        const error = new Error('Email and password are required to perform this operation.');
         error.status = 401;
         return next(error);
     }

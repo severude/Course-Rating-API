@@ -12,10 +12,9 @@ router.get('/users', mid.authorized, function(req, res, next) {
 // Creates a user, sets the Location header to "/", and returns no content
 router.post('/users', function(req, res, next) {
 	const user = new User(req.body);
-	user.save(function(err) {
-		if(err) return next(err);
-		res.status = 201;
-		res.redirect('/');
+	User.create(user, function(err, user) {
+		if(err) return next(err)
+		else res.status(201).location('/').end();
 	});
 });
 
