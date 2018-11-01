@@ -3,16 +3,17 @@ const express = require('express');
 const router = express.Router();
 const mid = require('../middleware');
 const User = require('../models').User;
+const Course = require('../models').Course;
 
 // Returns the currently authenticated user
 router.get('/users', mid.authorized, function(req, res, next) {
-	res.json(req.body.user);
+	res.status(200).json(req.body.user);
 });
 
 // Creates a user, sets the Location header to "/", and returns no content
 router.post('/users', function(req, res, next) {
 	const user = new User(req.body);
-	User.create(user, function(err, user) {
+	user.save(function(err) {
 		if(err) return next(err)
 		else res.status(201).location('/').end();
 	});
@@ -20,7 +21,10 @@ router.post('/users', function(req, res, next) {
 
 // Returns the Course "_id" and "title" properties
 router.get('/courses', function(req, res, next) {
-	res.json({response: "GET request for course _id and title properties"});
+	Course.find({}, '_id title', function(err, courses) {
+		if(err) return next(err)
+		else res.status(200).json(courses);
+	});
 });
 
 // Returns all Course properties and related user and review documents
