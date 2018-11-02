@@ -30,9 +30,11 @@ router.get('/courses', function(req, res, next) {
 // Returns all Course properties and related user and review documents
 // for the provided course ID
 router.get('/courses/:courseId', function(req, res, next) {
-	res.json({
-		response: "GET request for all course properties with related user and review documents",
-		courseId: req.params.courseId
+	Course.findById(req.params.courseId)
+		.populate('reviews user')
+		.exec(function(err, course) {
+			if(err) return next(err)
+			else res.status(200).json(course);
 	});
 });
 
