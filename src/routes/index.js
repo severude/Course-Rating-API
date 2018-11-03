@@ -14,7 +14,10 @@ router.get('/users', mid.authorized, function(req, res, next) {
 router.post('/users', function(req, res, next) {
 	const user = new User(req.body);
 	user.save(function(err) {
-		if(err) return next(err)
+		if(err) {
+			err.status = 400;
+			return next(err)
+		}
 		else res.status(201).location('/').end();
 	});
 });
@@ -39,19 +42,25 @@ router.get('/courses/:courseId', function(req, res, next) {
 });
 
 // Creates a course, sets the Location header, and returns no content
-router.post('/courses', function(req, res, next) {
-	res.json({
-		response: "POST request to create a course",
-		body: req.body
+router.post('/courses', mid.authorized, function(req, res, next) {
+	const course = new Course(req.body);
+	course.save(function(err) {
+		if(err) {
+			err.status = 400;
+			return next(err)
+		}
+		else res.status(201).location('/').end();
 	});
 });
 
 // Updates a course and returns no content
-router.put('/courses/:courseId', function(req, res, next) {
-	res.json({
-		response: "PUT request to update a course",
-		courseId: req.params.courseId,
-		body: req.body
+router.put('/courses/:courseId', mid.authorized, function(req, res, next) {
+	Course.findByIdAndUpdate(req.params.courseId, req.body, function(err) {
+		if(err) {
+			err.status = 400;
+			return next(err)
+		}
+		else res.status(204).location('/').end();
 	});
 });
 
