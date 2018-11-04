@@ -4,6 +4,7 @@ const router = express.Router();
 const mid = require('../middleware');
 const User = require('../models').User;
 const Course = require('../models').Course;
+const Review = require('../models').Review;
 
 // Returns the currently authenticated user
 router.get('/users', mid.authorized, function(req, res, next) {
@@ -66,11 +67,15 @@ router.put('/courses/:courseId', mid.authorized, function(req, res, next) {
 
 // Creates a review for the specified course ID, sets the Location header
 // to the related course, and returns no content
-router.post('/courses/:courseId/reviews', function(req, res, next) {
-	res.json({
-		response: "POST request to create a review for a specified course ID",
-		courseId: req.params.courseId,
-		body: req.body
+router.post('/courses/:courseId/reviews', mid.authorized, function(req, res, next) {
+	const review = new Review(req.body);
+	review.save();  // Saves the new review to the database
+	Course.findOneAndUpdate({_id: req.params.courseId}, {$push: {reviews: review}}, function(err, course) {
+		if(err) {
+			err.status = 400;
+			return next(err)
+		}
+		else res.status(201).location('/api/courses' + req.params.courseId).end();
 	});
 });
 
