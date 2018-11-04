@@ -17,7 +17,7 @@ router.post('/users', function(req, res, next) {
 	user.save(function(err) {
 		if(err) {
 			err.status = 400;
-			return next(err)
+			return next(err);
 		}
 		else res.status(201).location('/').end();
 	});
@@ -48,7 +48,7 @@ router.post('/courses', mid.authorized, function(req, res, next) {
 	course.save(function(err) {
 		if(err) {
 			err.status = 400;
-			return next(err)
+			return next(err);
 		}
 		else res.status(201).location('/').end();
 	});
@@ -59,7 +59,7 @@ router.put('/courses/:courseId', mid.authorized, function(req, res, next) {
 	Course.findByIdAndUpdate(req.params.courseId, req.body, function(err) {
 		if(err) {
 			err.status = 400;
-			return next(err)
+			return next(err);
 		}
 		else res.status(204).location('/').end();
 	});
@@ -69,13 +69,20 @@ router.put('/courses/:courseId', mid.authorized, function(req, res, next) {
 // to the related course, and returns no content
 router.post('/courses/:courseId/reviews', mid.authorized, function(req, res, next) {
 	const review = new Review(req.body);
-	review.save();  // Saves the new review to the database
-	Course.findOneAndUpdate({_id: req.params.courseId}, {$push: {reviews: review}}, function(err, course) {
+	review.save(function(err) {
 		if(err) {
 			err.status = 400;
-			return next(err)
+			return next(err);
+		} else {
+			Course.findOneAndUpdate({_id: req.params.courseId}, {$push: {reviews: review}},
+				function(err, course) {
+					if(err) {
+						err.status = 400;
+						return next(err);
+					}
+					else res.status(201).location('/api/courses' + req.params.courseId).end();
+			});
 		}
-		else res.status(201).location('/api/courses' + req.params.courseId).end();
 	});
 });
 
