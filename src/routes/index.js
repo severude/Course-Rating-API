@@ -35,7 +35,8 @@ router.get('/courses', function(req, res, next) {
 // for the provided course ID
 router.get('/courses/:courseId', function(req, res, next) {
 	Course.findById(req.params.courseId)
-		.populate('reviews user')
+		.populate({path: 'user', select: 'fullName'})
+		.populate({path: 'reviews', populate:{path: 'user', model: 'User', select: 'fullName'}})
 		.exec(function(err, course) {
 			if(err) return next(err)
 			else res.status(200).json(course);
