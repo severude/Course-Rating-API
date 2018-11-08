@@ -6,6 +6,15 @@ const User = require('../models').User;
 const Course = require('../models').Course;
 const Review = require('../models').Review;
 
+// Returns the course object in the request
+router.param('courseId', function(req, res, next, id) {
+	Course.findById(req.params.courseId).exec(function(err, course){
+		if(err) return next(err);
+		req.course = course;
+		return next();
+	});
+});
+
 // Returns the currently authenticated user
 router.get('/users', mid.authorized, function(req, res, next) {
 	res.status(200).json(req.body.user);
@@ -19,15 +28,15 @@ router.post('/users', function(req, res, next) {
 			err.status = 400;
 			return next(err);
 		}
-		else res.status(201).location('/').end();
+		res.status(201).location('/').end();
 	});
 });
 
 // Returns the Course "_id" and "title" properties
 router.get('/courses', function(req, res, next) {
 	Course.find({}, '_id title', function(err, courses) {
-		if(err) return next(err)
-		else res.status(200).json(courses);
+		if(err) return next(err);
+		res.status(200).json(courses);
 	});
 });
 
@@ -38,8 +47,13 @@ router.get('/courses/:courseId', function(req, res, next) {
 		.populate({path: 'user', select: 'fullName'})
 		.populate({path: 'reviews', populate:{path: 'user', model: 'User', select: 'fullName'}})
 		.exec(function(err, course) {
-			if(err) return next(err)
-			else res.status(200).json(course);
+			if(err) return next(err);
+			if(!course) {
+				const error = new Error('Course could not be found');
+				error.status = 404;
+				return next(error);
+			}
+			res.status(200).json(course);
 	});
 });
 
@@ -51,7 +65,7 @@ router.post('/courses', mid.authorized, function(req, res, next) {
 			err.status = 400;
 			return next(err);
 		}
-		else res.status(201).location('/').end();
+		res.status(201).location('/').end();
 	});
 });
 
@@ -62,7 +76,7 @@ router.put('/courses/:courseId', mid.authorized, function(req, res, next) {
 			err.status = 400;
 			return next(err);
 		}
-		else res.status(204).location('/').end();
+		res.status(204).location('/').end();
 	});
 });
 
@@ -70,20 +84,28 @@ router.put('/courses/:courseId', mid.authorized, function(req, res, next) {
 // to the related course, and returns no content
 router.post('/courses/:courseId/reviews', mid.authorized, function(req, res, next) {
 	const review = new Review(req.body);
+	const reviewer = req.body.user._id.toString();
+	const courseOwner = req.course.user.toString();
+
+	if (reviewer === courseOwner)
+	{
+		const error = new Error('User cannot review their own course');
+		error.status = 401;
+		return next(error);
+	}
+	
 	review.save(function(err) {
 		if(err) {
 			err.status = 400;
 			return next(err);
-		} else {
-			Course.findOneAndUpdate({_id: req.params.courseId}, {$push: {reviews: review}},
-				function(err, course) {
-					if(err) {
-						err.status = 400;
-						return next(err);
-					}
-					else res.status(201).location('/api/courses' + req.params.courseId).end();
-			});
 		}
+		Course.findOneAndUpdate({_id: req.params.courseId}, {$push: {reviews: review}},	function(err, course) {
+			if(err) {
+				err.status = 400;
+				return next(err);
+			}
+			res.status(201).location('/api/courses' + req.params.courseId).end();
+		});
 	});
 });
 
