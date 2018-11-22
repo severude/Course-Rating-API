@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const expect = require('chai').expect;
+const assert = require('assert');
 const User = require('../src/models').User;
 const request = require('supertest');
 const app = require('../src/index.js');
@@ -49,7 +50,10 @@ describe('Verify user credentials', () => {
             password: "password"
         });
         // Save user object to database
-        testUser.save(done);
+        testUser.save().then(function() {
+            assert(!testUser.isNew);
+            done();
+        });
       });
 
     it('should return 401 error with incorrect user credentials', function(done) {
@@ -57,7 +61,7 @@ describe('Verify user credentials', () => {
             .get('/api/users')
             .auth('jon@adams.com', 'password')
             .end((err, res) => {
-                expect(401);
+                expect(res.statusCode).to.be.equal(401);
                 done();
             });
     });
@@ -67,7 +71,11 @@ describe('Verify user credentials', () => {
             .get('/api/users')
             .auth('john@adams.com', 'password')
             .end((err, res) => {
-                expect(200, {fullName: "John Adams", emailAddress: "john@adams.com"});
+                expect(res.statusCode).to.be.equal(200);
+                expect(res.body._id).to.exist;
+                expect(res.body.fullName).to.be.equal('John Adams');
+                expect(res.body.emailAddress).to.be.equal('john@adams.com');
+                expect(res.body.password).to.exist;
                 done();
             });
     });

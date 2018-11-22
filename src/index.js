@@ -19,7 +19,6 @@ app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-// TODO add additional routes here
 mongoose.connect("mongodb://localhost:27017/course-api", { useNewUrlParser: true } );
 const db = mongoose.connection;
 
