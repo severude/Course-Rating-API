@@ -1,24 +1,14 @@
-const express = require('express');
-const mongoose = require("mongoose");
-const mid = require('../src/middleware');
-mongoose.Promise = global.Promise;
+const mongoose = require('mongoose');
 const expect = require('chai').expect;
 const User = require('../src/models').User;
-const request = require('superagent');
-const app = express();
+const request = require('supertest');
+const app = require('../src/index.js');
 
+// Make requests to /api/users with good and bad credentials for a known user
 describe('Verify user credentials', () => {
 
-    const userCredentials = {
-        emailAddress: "john@adams.com", 
-        password: "password"
-    }
-    const badCredentials = {
-        emailAddress: "jon@adams.com", 
-        password: "password"
-    }
-
-    before( (done) => {
+    // Before testing it should connect to the database
+    before( function(done) {
         mongoose.connect("mongodb://localhost:27017/course-api", { useNewUrlParser: true } );
 
         // Verify mongo database connection
@@ -30,48 +20,56 @@ describe('Verify user credentials', () => {
             .on("error", (err) => {
                 console.error("Mongo database connection error:", err);
             });
+    });
 
-        // Drop all users from database
+    // After testing drop all users and disconnect from the database
+    after( function(done) {
         mongoose.connection.collections.users.drop(() => {});
+        mongoose.disconnect();
+        console.log('Test suite completed');
+        done();
+    });    
 
+    // Unit tests start here
+
+    it('should have Mocha and Chai installed for testing', function () {
+        expect(true).to.be.ok;
+    });
+
+    it('should verify that it can connect to the app', function(done) {
+        request(app).get('/')
+            .expect(200, {"message": "Welcome to the Course Review API" }, done);
+    });
+
+    it('should create a test user', function (done) {
         // Create a user object for testing
         const testUser = new User({
             fullName: "John Adams",
             emailAddress: "john@adams.com",
             password: "password"
         });
-
         // Save user object to database
-        testUser.save((err) => {
-            if(err) throw err;
-        });
-    });
+        testUser.save(done);
+      });
 
-    it('should return corresponding user document with correct user credentials', () => {
-        request.agent(app)
+    it('should return 401 error with incorrect user credentials', function(done) {
+        request(app)
             .get('/api/users')
-            .send(userCredentials)
+            .auth('jon@adams.com', 'password')
             .end((err, res) => {
-                if(err) throw err;
-                expect(res.statusCode).to.equal(200);
+                expect(401);
                 done();
             });
     });
 
-    it('should return 401 error with incorrect user credentials', () => {
-        request.agent(app)
+    it('should return corresponding user document with correct user credentials', function(done) {
+        request(app)
             .get('/api/users')
-            .send(badCredentials)
+            .auth('john@adams.com', 'password')
             .end((err, res) => {
-                if(err) throw err;
-                expect(res.statusCode).to.equal(401);
+                expect(200, {fullName: "John Adams", emailAddress: "john@adams.com"});
                 done();
             });
     });
 
-    after( (done) => {
-        mongoose.disconnect();
-        console.log('Test suite completed');
-        done();
-    });    
 });

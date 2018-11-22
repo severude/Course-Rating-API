@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "nodemon ./src/index.js localhost 5000",
-    "test": "mocha --no-deprecation"
+    "test": "mocha --no-deprecation --no-warnings --exit"
   },
   "author": "",
   "license": "ISC",
@@ -13,7 +13,6 @@
     "chai": "^4.2.0",
     "mocha": "^5.2.0",
     "nodemon": "^1.17.5",
-    "superagent": "^4.0.0-beta.5",
     "supertest": "^3.3.0"
   },
   "dependencies": {
