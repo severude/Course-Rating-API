@@ -16,6 +16,7 @@ mongoimport --db course-api --collection reviews --type=json --jsonArray --file 
 3) mongod - Runs the primary daemon process for the MongoDB system
 4) npm start - Launches the app on port 5000
 5) Routes can be verified using the Postman tool for API Development.  The provided CourseAPI.postman_collection.json file contains a a collection of Postman requests.
+6) npm test - Tests that the project is setup correctly and that the user authenticaton works.
 
 # Available REST API Endpoints
 ```javascript
@@ -27,3 +28,13 @@ POST /api/courses
 PUT /api/courses/:courseId
 POST /api/courses/:courseId/reviews
 ```
+---
+It's finished, Dale!!
+
+Shout for joy, run around the block, buy yourself something awesome--do something for yourself! Finishing project 11th is such a huge accomplishment. It really is a tough one so I commend you for getting this far. The accomplishment is not a small one to take lightly, this is some elite stuff. You were so thorough through your FIRST (let me emphasize, because this is a notorious project if it's the first time creating an API) submission.
+
+Reading, snatching data from, and creating APIs will be a part of your career as a developer, so read up more on what APIs have to offer that you have yet to explore. I know I'm going to build an API to attach to any one of my projects for some added practice.
+
+Moving on to the final project! Finally, you've made it to the end. Review any technologies and topics that have baffled you. As an extra (of course this is up to you), you can use the technology that you had trouble with before and create your last project with it. Whatever you do, you'll be propelling yourself in another higher category of achievers.
+
+We're excited to see what you'll do for your final project!
