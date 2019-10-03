@@ -5,6 +5,19 @@ const User = require('../src/models').User;
 const request = require('supertest');
 const app = require('../src/index.js');
 
+describe('Verify Project Setup', () => {
+
+    it('should have Mocha and Chai installed for testing', function () {
+        expect(true).to.be.ok;
+    });
+
+    it('should verify that it can connect to the app', function(done) {
+        request(app).get('/')
+            .expect(200, {"message": "Welcome to the Course Review API" }, done);
+    });
+
+});
+
 // Make requests to /api/users with good and bad credentials for a known user
 describe('Verify user credentials', () => {
 
@@ -31,17 +44,6 @@ describe('Verify user credentials', () => {
         done();
     });    
 
-    // Unit tests start here
-
-    it('should have Mocha and Chai installed for testing', function () {
-        expect(true).to.be.ok;
-    });
-
-    it('should verify that it can connect to the app', function(done) {
-        request(app).get('/')
-            .expect(200, {"message": "Welcome to the Course Review API" }, done);
-    });
-
     it('should create a test user', function (done) {
         // Create a user object for testing
         const testUser = new User({
@@ -54,7 +56,7 @@ describe('Verify user credentials', () => {
             assert(!testUser.isNew);
             done();
         });
-      });
+    });
 
     it('should return 401 error with incorrect user credentials', function(done) {
         request(app)
