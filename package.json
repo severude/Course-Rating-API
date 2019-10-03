@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "nodemon ./src/index.js localhost 5000",
-    "test": "mocha --no-deprecation --no-warnings --exit"
+    "test": "mocha --no-deprecation --no-warnings --timeout 5000 --exit"
   },
   "author": "",
   "license": "ISC",
